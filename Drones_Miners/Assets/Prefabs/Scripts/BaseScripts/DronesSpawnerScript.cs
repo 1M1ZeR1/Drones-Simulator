@@ -8,12 +8,15 @@ public class DronesSpawnerScript : MonoBehaviour
     [Header("Объект дрона")]
     [SerializeField] private GameObject droneObject;
 
-    [SerializeField] private GameObject pathRendererObject;
+    [SerializeField] private GameObject playerCanvas;
     private PathRendererScript pathRendererScript;
+
+    private DronesListsScript dronesListsScript;
 
     [SerializeField] private GameObject[] spawnPlaces;
 
     [SerializeField] private Material sideMaterial;
+    [SerializeField] private Material pathMaterial;
 
     protected List<GameObject> _allDrones = new List<GameObject>();
 
@@ -25,7 +28,8 @@ public class DronesSpawnerScript : MonoBehaviour
 
     private void Start()
     {
-        pathRendererObject.TryGetComponent(out pathRendererScript);
+        playerCanvas.TryGetComponent(out pathRendererScript);
+        playerCanvas.TryGetComponent(out dronesListsScript);
 
         StartCoroutine(SpawnDrones(countOfDrons));
     }
@@ -40,7 +44,14 @@ public class DronesSpawnerScript : MonoBehaviour
 
             newDrone.GetComponent<DroneControllerScript>().SetBase(spawnPlaces[i]);
             newDrone.GetComponent<DroneControllerScript>().SetSide(side);
-            newDrone.GetComponent<MeshRenderer>().material = sideMaterial;
+
+            Renderer[] allRenderers = newDrone.GetComponentsInChildren<Renderer>();
+
+            foreach(Renderer renderer in allRenderers) { renderer.material = sideMaterial; }
+
+            newDrone.GetComponent<LineRenderer>().material = pathMaterial;
+
+            newDrone.name = $"Drone #{i+1}";
 
             newDrone.GetComponent<NavMeshAgent>().speed = speedPreset;
 
@@ -48,6 +59,8 @@ public class DronesSpawnerScript : MonoBehaviour
             countOfDrons++;
 
             newDrone.SetActive(true);
+
+            StartCoroutine(dronesListsScript.CreateDronePanel(side, newDrone));
 
             yield return spawnInterval;
         }
@@ -67,8 +80,12 @@ public class DronesSpawnerScript : MonoBehaviour
             Destroy(drone);
         }
 
+        dronesListsScript.ClearList();
+
         _allDrones.Clear();
         countOfDrons = 0;
+
+        CameraModeScript.ChangeCameraState(null);
 
         StartCoroutine(SpawnDrones((int)value));
     }

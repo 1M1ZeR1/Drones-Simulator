@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MeteorsSpawnerScript : MonoBehaviour
 {
-    [SerializeField] private GameObject meteor;
+    [SerializeField] private GameObject[] meteors;
 
     [SerializeField] private int spawnInterval;
 
@@ -33,7 +33,7 @@ public class MeteorsSpawnerScript : MonoBehaviour
         {
             Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, Random.Range(-15f, 15f));
 
-            GameObject newMeteor = Instantiate(meteor, spawnPosition, Quaternion.identity, transform);
+            GameObject newMeteor = Instantiate(meteors[Random.Range(0,meteors.Length)], spawnPosition, Quaternion.identity, transform);
 
             newMeteor.SetActive(true);
         }

@@ -13,6 +13,8 @@ public class DroneControllerScript : MonoBehaviour
     [SerializeField] private GameObject scoreControllerObject;
     private ScoreController scoreControllerScript;
 
+    private DroneModeScript droneModeScript;
+
     private NavMeshAgent agent;
 
     protected GameObject _targetResource;
@@ -24,6 +26,7 @@ public class DroneControllerScript : MonoBehaviour
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        droneModeScript = GetComponent<DroneModeScript>();
 
         resourcesSpawnerObject.TryGetComponent(out resourcesSpawnerScript);
         scoreControllerObject.TryGetComponent(out scoreControllerScript);
@@ -36,6 +39,8 @@ public class DroneControllerScript : MonoBehaviour
     {
         if(_targetResource == null && !_inCollected)
         {
+            droneModeScript.SetMode(DroneMode.Search);
+
             float distance = float.MaxValue;
 
             GameObject chosenObject = null;
@@ -78,6 +83,8 @@ public class DroneControllerScript : MonoBehaviour
         {
             resourcesSpawnerScript.CollectResource(collision.gameObject, gameObject);
 
+            droneModeScript.SetMode(DroneMode.Work);
+
             _inCollected = true;
 
             resourcesSpawnerScript.OnCollected += HandleResourceCollected;
@@ -97,6 +104,8 @@ public class DroneControllerScript : MonoBehaviour
 
             scoreControllerScript.AddScore(side);
 
+            droneModeScript.SetMode(DroneMode.Delivery);
+
             resourcesSpawnerScript.OnCollected -= HandleResourceCollected; }
     }
 
@@ -106,6 +115,8 @@ public class DroneControllerScript : MonoBehaviour
 
         _withResource = false;
         _inCollected = false;
+
+        droneModeScript.SetMode(DroneMode.Search);
     }
 
     public void ClearAllEvents()
